@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Classifier</h1>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="file">Upload PDF:</label>
+            <input type="file" id="file" name="file" accept="application/pdf" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <div id="responseMessage"></div>
+
+        <div id="statusCheck" class="hidden">
+            <h2>Check Task Status</h2>
+            <label for="taskId">Task ID:</label>
+            <input type="text" id="taskId">
+            <button onclick="checkStatus()">Check Status</button>
+            <div id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('file', document.getElementById('file').files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('responseMessage').textContent = `File uploaded! Task ID: ${data.task_id}`;
+                document.getElementById('statusCheck').classList.remove('hidden');
+                document.getElementById('taskId').value = data.task_id;
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = 'Error uploading file';
+            }
+        });
+
+        async function checkStatus() {
+            const taskId = document.getElementById('taskId').value;
+            try {
+                const response = await fetch(`/status/${taskId}`);
+                const data = await response.json();
+                document.getElementById('statusMessage').textContent = `Status: ${data.status}`;
+                if (data.result) {
+                    document.getElementById('statusMessage').textContent += `, Result: ${data.result}`;
+                }
+            } catch (error) {
+                document.getElementById('statusMessage').textContent = 'Error fetching status';
+            }
+        }
+    </script>
+</body>
+</html>
