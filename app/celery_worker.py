@@ -10,7 +10,5 @@ def make_celery(app):
 
 
 app = create_app()  # Create an instance of your Flask app
-with app.app_context():
-    from .tasks import classify_pdf
 
 celery_work = make_celery(app)  # Create a Celery instance
